@@ -3,6 +3,11 @@ export type ChatMessage = {
   content: string;
   user: string;
   role: "user" | "assistant";
+  type?: "text" | "file";
+  fileName?: string;
+  fileSize?: number;
+  fileType?: string;
+  fileData?: string; // base64 encoded file data
 };
 
 export type Message =
@@ -12,6 +17,11 @@ export type Message =
       content: string;
       user: string;
       role: "user" | "assistant";
+      messageType?: "text" | "file";
+      fileName?: string;
+      fileSize?: number;
+      fileType?: string;
+      fileData?: string;
     }
   | {
       type: "update";
@@ -19,6 +29,11 @@ export type Message =
       content: string;
       user: string;
       role: "user" | "assistant";
+      messageType?: "text" | "file";
+      fileName?: string;
+      fileSize?: number;
+      fileType?: string;
+      fileData?: string;
     }
   | {
       type: "all";

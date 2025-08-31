@@ -22,13 +22,38 @@ export class Chat extends Server<Env> {
 
     // create the messages table if it doesn't exist
     this.ctx.storage.sql.exec(
-      `CREATE TABLE IF NOT EXISTS messages (id TEXT PRIMARY KEY, user TEXT, role TEXT, content TEXT)`,
+      `CREATE TABLE IF NOT EXISTS messages (
+        id TEXT PRIMARY KEY, 
+        user TEXT, 
+        role TEXT, 
+        content TEXT,
+        type TEXT DEFAULT 'text',
+        fileName TEXT,
+        fileSize INTEGER,
+        fileType TEXT,
+        fileData TEXT
+      )`
     );
 
-    // load the messages from the database
-    this.messages = this.ctx.storage.sql
-      .exec(`SELECT * FROM messages`)
-      .toArray() as ChatMessage[];
+    // 检查表结构并升级（向后兼容）
+    try {
+      // 尝试查询新结构
+      this.messages = this.ctx.storage.sql
+        .exec(`SELECT id, user, role, content, type, fileName, fileSize, fileType, fileData FROM messages`)
+        .toArray() as ChatMessage[];
+    } catch (error) {
+      // 如果表存在但缺少新列，添加新列
+      this.ctx.storage.sql.exec(`ALTER TABLE messages ADD COLUMN type TEXT DEFAULT 'text'`);
+      this.ctx.storage.sql.exec(`ALTER TABLE messages ADD COLUMN fileName TEXT`);
+      this.ctx.storage.sql.exec(`ALTER TABLE messages ADD COLUMN fileSize INTEGER`);
+      this.ctx.storage.sql.exec(`ALTER TABLE messages ADD COLUMN fileType TEXT`);
+      this.ctx.storage.sql.exec(`ALTER TABLE messages ADD COLUMN fileData TEXT`);
+      
+      // 重新加载消息
+      this.messages = this.ctx.storage.sql
+        .exec(`SELECT id, user, role, content, type, fileName, fileSize, fileType, fileData FROM messages`)
+        .toArray() as ChatMessage[];
+    }
   }
 
   onConnect(connection: Connection) {
@@ -54,14 +79,42 @@ export class Chat extends Server<Env> {
       this.messages.push(message);
     }
 
+    // 更新数据库结构以支持文件消息
     this.ctx.storage.sql.exec(
-      `INSERT INTO messages (id, user, role, content) VALUES ('${
-        message.id
-      }', '${message.user}', '${message.role}', ${JSON.stringify(
+      `CREATE TABLE IF NOT EXISTS messages (
+        id TEXT PRIMARY KEY, 
+        user TEXT, 
+        role TEXT, 
+        content TEXT,
+        type TEXT DEFAULT 'text',
+        fileName TEXT,
+        fileSize INTEGER,
+        fileType TEXT,
+        fileData TEXT
+      )`
+    );
+
+    this.ctx.storage.sql.exec(
+      `INSERT INTO messages (id, user, role, content, type, fileName, fileSize, fileType, fileData) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) 
+       ON CONFLICT (id) DO UPDATE SET 
+         content = EXCLUDED.content,
+         type = EXCLUDED.type,
+         fileName = EXCLUDED.fileName,
+         fileSize = EXCLUDED.fileSize,
+         fileType = EXCLUDED.fileType,
+         fileData = EXCLUDED.fileData`,
+      [
+        message.id,
+        message.user,
+        message.role,
         message.content,
-      )}) ON CONFLICT (id) DO UPDATE SET content = ${JSON.stringify(
-        message.content,
-      )}`,
+        message.type || 'text',
+        message.fileName || null,
+        message.fileSize || null,
+        message.fileType || null,
+        message.fileData || null
+      ]
     );
   }
 

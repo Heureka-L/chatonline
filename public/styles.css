@@ -1,3 +1,29 @@
+:root {
+  --bg-color: #ffffff;
+  --text-color: #333333;
+  --border-color: #e1e1e1;
+  --input-bg: #ffffff;
+  --input-border: #d1d1d1;
+  --button-bg: #33c3f0;
+  --button-text: #ffffff;
+  --message-bg: #f8f9fa;
+  --user-color: #2c3e50;
+  --container-bg: #ffffff;
+}
+
+[data-theme="dark"] {
+  --bg-color: #1a1a1a;
+  --text-color: #e4e4e4;
+  --border-color: #333333;
+  --input-bg: #2d2d2d;
+  --input-border: #404040;
+  --button-bg: #0066cc;
+  --button-text: #ffffff;
+  --message-bg: #2d2d2d;
+  --user-color: #66b3ff;
+  --container-bg: #1a1a1a;
+}
+
 body,
 html {
   height: 100%;
@@ -5,6 +31,9 @@ html {
   padding: 0;
   display: flex;
   flex-direction: column;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .chat {
@@ -18,16 +47,21 @@ html {
   justify-content: flex-end;
   overflow-y: auto;
   height: 100%;
-  /* padding: 10px; */
+  background-color: var(--container-bg);
 }
 
 .message {
   margin-bottom: 10px;
+  background-color: var(--message-bg);
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
 }
 
 .message .user {
   font-weight: bold;
   text-align: right;
+  color: var(--user-color);
 }
 
 .message .remove {
@@ -35,17 +69,123 @@ html {
   width: 22px;
   height: 20px;
   left: -60px;
-  /* display: "block", */
   display: none;
   padding: 0;
   line-height: 18px;
-  border: "none";
+  border: none;
 }
 
 .send-message {
   padding: 0;
+  background-color: var(--button-bg) !important;
+  color: var(--button-text) !important;
+  border: 1px solid var(--button-bg) !important;
+}
+
+.my-input-text {
+  background-color: var(--input-bg);
+  color: var(--text-color);
+  border: 1px solid var(--input-border);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .my-input-text::placeholder {
-  color: #ccc;
+  color: #888;
+}
+
+/* 主题切换按钮样式 */
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.theme-toggle:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+/* 文件消息样式 */
+.file-message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background-color: var(--message-bg);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.file-icon {
+  font-size: 24px;
+}
+
+.file-info {
+  flex: 1;
+}
+
+.file-name {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.file-size {
+  font-size: 12px;
+  color: #888;
+}
+
+.file-download {
+  background: var(--button-bg);
+  color: var(--button-text);
+  padding: 5px 10px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 12px;
+  transition: opacity 0.3s ease;
+}
+
+.file-download:hover {
+  opacity: 0.8;
+}
+
+
+
+/* 文件输入按钮样式 */
+input[type="file"] {
+  display: none;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .theme-toggle {
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+  
+  .file-message {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .file-download {
+    align-self: flex-end;
+  }
 }
